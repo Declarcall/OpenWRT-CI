@@ -152,15 +152,15 @@ jobs:
         run: |
           cd ./wrt/
 
-          ./scripts/feeds update -a 2>&1 | tee $GITHUB_WORKSPACE/build.log
-          ./scripts/feeds install -a 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
 
       - name: Custom Packages
         run: |
           cd ./wrt/package/
 
-          $GITHUB_WORKSPACE/Scripts/Packages.sh 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
-          $GITHUB_WORKSPACE/Scripts/Handles.sh 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+          $GITHUB_WORKSPACE/Scripts/Packages.sh
+          $GITHUB_WORKSPACE/Scripts/Handles.sh
 
       - name: Custom Settings
         run: |
@@ -172,23 +172,23 @@ jobs:
             cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt $GITHUB_WORKSPACE/Config/GENERAL.txt >> .config
           fi
 
-          $GITHUB_WORKSPACE/Scripts/Settings.sh 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+          $GITHUB_WORKSPACE/Scripts/Settings.sh
 
-          make defconfig -j$(nproc) 2>&1 | tee -a $GITHUB_WORKSPACE/build.log && make clean -j$(nproc) 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+          make defconfig -j$(nproc) && make clean -j$(nproc)
 
       - name: Download Packages
         if: env.WRT_TEST != 'true'
         run: |
           cd ./wrt/
 
-          make download -j$(nproc) 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+          make download -j$(nproc)
 
       - name: Compile Firmware
         if: env.WRT_TEST != 'true'
         run: |
           cd ./wrt/
 
-          make -j$(nproc) 2>&1 | tee -a $GITHUB_WORKSPACE/build.log || make -j1 V=s 2>&1 | tee -a $GITHUB_WORKSPACE/build.log
+          make -j$(nproc) || make -j1 V=s
 
       - name: Machine Information
         run: |
@@ -253,37 +253,3 @@ jobs:
 
             内核版本：${{env.WRT_KVER}}
             插件列表：${{env.WRT_LIST}}
-
-      - name: Save and Commit Logs
-        if: always()
-        run: |
-          cd $GITHUB_WORKSPACE
-          mkdir -p Logs
-
-          # Compress build.log if exists
-          if [ -f build.log ]; then
-            tar -czf Logs/${{ github.workflow }}-${WRT_CONFIG}-${WRT_DATE}.log.tar.gz build.log
-            rm -f build.log
-          fi
-
-          # Clean up logs older than 3 days
-          threshold_date=$(TZ=UTC-8 date -d "3 days ago" +"%y.%m.%d")
-          for file in Logs/*; do
-            if [ -f "$file" ]; then
-              filename=$(basename "$file")
-              file_date=$(echo "$filename" | grep -oE '[0-9]{2}\.[0-9]{2}\.[0-9]{2}')
-              if [ -n "$file_date" ] && [ "$file_date" \< "$threshold_date" ]; then
-                git rm -f "$file" || rm -f "$file"
-                echo "Deleted old log: $file"
-              fi
-            fi
-          done
-
-          # Commit and Push Logs
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          git add Logs/
-          git commit -m "chore: upload build log for ${{ github.workflow }}-${WRT_CONFIG}-${WRT_DATE}" || true
-          git fetch origin
-          git rebase origin/${{ github.ref_name }} || true
-          git push origin HEAD:${{ github.ref }} || true
