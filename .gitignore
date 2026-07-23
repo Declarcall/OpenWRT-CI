@@ -1,0 +1,12 @@
+# Hidden folders for non-project/private scripts and docs
+.scripts/
+.docs/
+.secrets/
+.env
+
+# Logs and temporary execution files
+logs/
+Logs/
+*.log
+*.token
+*.key
