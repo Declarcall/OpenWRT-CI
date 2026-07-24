@@ -1,5 +1,7 @@
 # OpenWRT-CI Build & Dependency Rules
 
+> **强制前置规则**：在执行任何 CI 编译任务、修改配置文件、编写 Shell 脚本或调试报错前，必须先复核并严苛遵循项目标准构建链路文档 [openwrt_standard_build_flow.md](file:///.docs/openwrt_standard_build_flow.md)。
+
 ## 1. 编译期磁盘防爆原则 (Build-Time Disk Space Guard)
 - ** Runner 极限空间清理**：每次 CI 编译前必须清理 GitHub Actions 预装的无用软件（含 `.NET`, `Android SDK`, `GHC`, `CodeQL`, `Powershell`, `Swift`, `Chromium`, `Boost`, `JVM`, `Docker/Containerd cache`, `Pipx`, `Vcpkg`, `Node_modules`），确保虚拟机保持 60GB+ 可用空闲。
 - **避免重型 GUI/C++ 依赖**：严禁在默认配置中引入 `Qt6` (`qt6base`, `qt6tools`), `rblibtorrent` 等巨型 C++ 框架。
