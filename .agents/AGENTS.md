@@ -10,3 +10,7 @@
 - **变体裁切与避坑规则**：对于存在废弃依赖的包变体（如 `avahi` 的 `dbus` 变体依赖缺失的 `libdaemon`），必须显式禁用该变体 (`avahi-dbus-daemon=n`) 并启用稳定变体 (`avahi-nodbus-daemon=y`, `umdns=y`)。
 - **同名包碰撞预防**：开启 `dnsmasq-full=y` 时，必须显式禁用基础版 `dnsmasq=n`。
 - **第三方仓库提取模式**：使用 `Packages.sh` 脚本提取多包仓库（如 `fw876/helloworld`）时，确保使用正确的解压模式（`"name"` 模式）。
+
+## 3. 依赖图完整性原则 (Dependency Graph Integrity Rule)
+- **优先补齐源码而非篡改依赖图**：遇到缺失依赖库时，必须通过 `Packages.sh` 克隆补齐该依赖包的源码，绝不能盲目用 `sed` 强行抹除 `Makefile` 中的 `DEPENDS:=+pkg` 依赖声明。抹除依赖声明会破坏 OpenWRT 的编译拓扑顺序（导致依赖库未先编译进 `staging_dir`，目标包提前编译报错）。
+- **严禁虚构 Autoconf/Configure 参数**：严禁在 `Handles.sh` 中擅自注入未经上游 `configure.ac` 验证的构建参数（如不存在的 `--disable-libdaemon`）。遵循 OpenWRT 标准构建链路。
