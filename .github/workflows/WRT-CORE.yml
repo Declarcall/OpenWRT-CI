@@ -188,7 +188,12 @@ jobs:
         run: |
           cd ./wrt/
           export GOPROXY=https://proxy.golang.org,direct
-          make -j$(nproc) || make -j1 V=s
+          if [ -n "$WRT_PACKAGE" ]; then
+            echo "=== TARGETED QUICK TEST FOR PACKAGE: $WRT_PACKAGE ==="
+            make package/feeds/packages/avahi/compile -j$(nproc) || make package/feeds/packages/avahi/compile -j1 V=s
+          else
+            make -j$(nproc) || make -j1 V=s
+          fi
 
       - name: Machine Information
         run: |
