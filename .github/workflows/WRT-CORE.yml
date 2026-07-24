@@ -188,26 +188,7 @@ jobs:
         run: |
           cd ./wrt/
           export GOPROXY=https://proxy.golang.org,direct
-          if [ -n "$WRT_PACKAGE" ]; then
-            echo "========================================================="
-            echo "=== TARGETED VERBOSE TEST FOR PACKAGES: $WRT_PACKAGE ==="
-            echo "========================================================="
-            echo "--> Preparing Host Build Tools (tools/install)..."
-            make tools/install -j$(nproc)
-            echo "========================================================="
-            echo "--> .config entries for avahi / daemon / dbus:"
-            grep -iE "avahi|daemon|dbus" .config || true
-            echo "========================================================="
-            echo "--> Found package directories for $WRT_PACKAGE:"
-            find package/ feeds/ -maxdepth 4 -type d -iname "*avahi*" -o -iname "*libdaemon*" 2>/dev/null || true
-            echo "========================================================="
-            for PKG in $WRT_PACKAGE; do
-              echo "--> Executing verbose compile V=s for: $PKG"
-              make package/feeds/packages/$PKG/compile -j1 V=s || make package/$PKG/compile -j1 V=s
-            done
-          else
-            make -j$(nproc) || make -j1 V=s
-          fi
+          make -j$(nproc) || make -j1 V=s
 
       - name: Machine Information
         run: |
