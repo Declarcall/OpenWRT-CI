@@ -260,11 +260,13 @@ fi
 #修复avahi缺失libdaemon依赖编译失败
 AVAHI_FILE="$(find "$FEEDS_PACKAGES" -maxdepth 4 -type f -wholename '*/avahi/Makefile' -print -quit 2>/dev/null)"
 if [ -f "$AVAHI_FILE" ]; then
-	echo " "
-	if sed -i 's/+libdaemon//g' "$AVAHI_FILE"; then
-		echo "avahi Makefile has been fixed!"
-	else
-		echo "avahi Makefile fix failed; continuing!"
-	fi
+	echo "Patching avahi Makefile for libdaemon removal..."
+	sed -i 's/+libdaemon//g' "$AVAHI_FILE"
+	sed -i 's/--enable-dbus/--enable-dbus --disable-libdaemon/g' "$AVAHI_FILE"
+	sed -i 's/CONFIGURE_ARGS +=/CONFIGURE_ARGS += --disable-libdaemon /g' "$AVAHI_FILE"
+	echo "avahi Makefile has been fixed!"
 fi
+
+#批量清理其他可能存在的 libdaemon 依赖
+find "$FEEDS_PACKAGES" -maxdepth 4 -type f -name 'Makefile' -exec sed -i 's/+libdaemon//g' {} + 2>/dev/null || true
 
