@@ -65,7 +65,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Projects
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
 
       - name: Free Disk Space & Initialization Environment
         env:
@@ -73,7 +76,7 @@ jobs:
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache /usr/local/share/powershell /usr/share/swift /usr/local/share/chromium /usr/local/share/boost /usr/lib/jvm /var/lib/docker /var/lib/containerd /usr/local/doc /usr/local/man /opt/pipx /usr/local/lib/node_modules /usr/local/share/vcpkg /usr/share/sbt /usr/local/julia*
           sudo -E apt-get update -y
-          sudo -E apt-get install -y --no-install-recommends dos2unix libfuse-dev clang llvm lld gawk gettext libncurses-dev libssl-dev zlib1g-dev libelf-dev python3-pyelftools
+          sudo -E apt-get install -y --no-install-recommends dos2unix libfuse-dev clang llvm lld gawk gettext libncurses-dev libssl-dev zlib1g-dev libelf-dev python3-pyelftools python3-setuptools
           sudo -E timedatectl set-timezone "Asia/Shanghai"
 
           sudo mkdir -p /mnt/build_wrt
@@ -184,7 +187,7 @@ jobs:
         run: |
           cd ./wrt/
           export GOPROXY=https://proxy.golang.org,direct
-          make -j$(nproc) || make -j1 V=s
+          make -j$(nproc) || make -j1 V=s 2>&1 | tee /tmp/build_verbose.log
 
       - name: Collect and Commit Build Failure Logs
         if: failure()
@@ -205,6 +208,12 @@ jobs:
           echo "=========================================================" >> "$LOG_FILE"
           echo "" >> "$LOG_FILE"
           
+          if [ -f "/tmp/build_verbose.log" ]; then
+            echo "--- VERBOSE SINGLE-THREADED BUILD OUTPUT (LAST 500 LINES) ---" >> "$LOG_FILE"
+            tail -n 500 /tmp/build_verbose.log >> "$LOG_FILE" 2>/dev/null || true
+            echo "" >> "$LOG_FILE"
+          fi
+
           if [ -d "./wrt/logs" ]; then
             echo "--- OPENWRT BUILD LOGS ---" >> "$LOG_FILE"
             find ./wrt/logs -type f -exec echo "=== Log: {} ===" \; -exec cat {} \; >> "$LOG_FILE" 2>/dev/null || true
@@ -223,7 +232,7 @@ jobs:
           
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$LOG_DIR"
+          git add -f "$LOG_DIR"
           git diff --quiet && git diff --staged --quiet || (git commit -m "ci(logs): save build failure log for ${WRT_NAME:-BUILD} [$TIMESTAMP]" && git push origin dev)
 
       - name: Machine Information
