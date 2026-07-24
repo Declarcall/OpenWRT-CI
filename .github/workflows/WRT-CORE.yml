@@ -71,7 +71,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache /usr/local/share/powershell /usr/share/swift /usr/local/share/chromium /var/lib/docker
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache /usr/local/share/powershell /usr/share/swift /usr/local/share/chromium /usr/local/share/boost /usr/lib/jvm /var/lib/docker /var/lib/containerd /usr/local/doc /usr/local/man
           sudo -E apt -yqq update
           sudo -E apt -yqq install dos2unix libfuse-dev
           sudo -E apt -yqq autoremove --purge
@@ -83,6 +83,7 @@ jobs:
           sudo mkdir -p /mnt/build_wrt
           sudo chown $USER:$USER /mnt/build_wrt
           sudo ln -s /mnt/build_wrt $GITHUB_WORKSPACE/wrt
+          echo "=== Free Disk Space After Cleanup ==="
           df -h
 
       - name: Initialization Values
