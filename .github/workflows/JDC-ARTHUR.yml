@@ -15,6 +15,9 @@ on:
       - '.agents/**'
       - '.docs/**'
       - '.scripts/**'
+      - '.gitignore'
+      - 'logs/**'
+      - 'Logs/**'
   #手动编译触发
   workflow_dispatch:
     inputs:

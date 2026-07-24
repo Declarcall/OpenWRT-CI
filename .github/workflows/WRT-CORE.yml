@@ -186,6 +186,46 @@ jobs:
           export GOPROXY=https://proxy.golang.org,direct
           make -j$(nproc) || make -j1 V=s
 
+      - name: Collect and Commit Build Failure Logs
+        if: failure()
+        run: |
+          echo "========================================================="
+          echo "=== BUILD FAILURE DETECTED: COLLECTING FAILURE LOGS ==="
+          echo "========================================================="
+          
+          LOG_DIR="$GITHUB_WORKSPACE/logs/build_failures"
+          mkdir -p "$LOG_DIR"
+          
+          TIMESTAMP=$(TZ=UTC-8 date +"%Y-%m-%d_%H-%M-%S")
+          LOG_FILE="$LOG_DIR/failure_${WRT_NAME:-BUILD}_${TIMESTAMP}.log"
+          
+          echo "Build Failure Diagnostic Report - $TIMESTAMP" > "$LOG_FILE"
+          echo "Target Config: ${WRT_CONFIG:-UNKNOWN}" >> "$LOG_FILE"
+          echo "Commit SHA: $GITHUB_SHA" >> "$LOG_FILE"
+          echo "=========================================================" >> "$LOG_FILE"
+          echo "" >> "$LOG_FILE"
+          
+          if [ -d "./wrt/logs" ]; then
+            echo "--- OPENWRT BUILD LOGS ---" >> "$LOG_FILE"
+            find ./wrt/logs -type f -exec echo "=== Log: {} ===" \; -exec cat {} \; >> "$LOG_FILE" 2>/dev/null || true
+          fi
+
+          if [ -d "./wrt/build_dir" ]; then
+            echo "--- RECENT ERROR LOGS IN BUILD DIR ---" >> "$LOG_FILE"
+            find ./wrt/build_dir -type f \( -name "*.log" -o -name "compile.log" -o -name "configure.log" \) 2>/dev/null | tail -n 20 | while read -r F; do
+              echo "=== File: $F ===" >> "$LOG_FILE"
+              tail -n 100 "$F" >> "$LOG_FILE" 2>/dev/null || true
+            done
+          fi
+          
+          echo "--> Cleaning up failure logs older than 7 days..."
+          find "$LOG_DIR" -type f -mtime +7 -delete 2>/dev/null || true
+          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$LOG_DIR"
+          git diff --quiet && git diff --staged --quiet || (git commit -m "ci(logs): save build failure log for ${WRT_NAME:-BUILD} [$TIMESTAMP]" && git push origin dev)
+
       - name: Machine Information
         run: |
           cd ./wrt/
