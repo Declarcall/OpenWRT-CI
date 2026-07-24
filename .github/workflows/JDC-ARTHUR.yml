@@ -10,6 +10,11 @@ on:
   push:
     branches:
       - dev
+    paths-ignore:
+      - '**.md'
+      - '.agents/**'
+      - '.docs/**'
+      - '.scripts/**'
   #手动编译触发
   workflow_dispatch:
     inputs:
