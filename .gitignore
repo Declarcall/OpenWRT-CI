@@ -1,4 +1,5 @@
 # Hidden folders for non-project/private scripts and docs
+.agents/
 .scripts/
 .docs/
 .secrets/
