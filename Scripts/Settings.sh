@@ -45,7 +45,13 @@ fi
 
 #手动调整的插件
 if [ -n "$WRT_PACKAGE" ]; then
-	echo -e "$WRT_PACKAGE" >> ./.config
+	for PKG in $WRT_PACKAGE; do
+		if [[ "$PKG" == CONFIG_* ]]; then
+			echo "$PKG" >> ./.config
+		else
+			echo "CONFIG_PACKAGE_$PKG=y" >> ./.config
+		fi
+	done
 fi
 
 #无WIFI配置标志
