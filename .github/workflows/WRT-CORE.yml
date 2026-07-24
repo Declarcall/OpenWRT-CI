@@ -190,7 +190,9 @@ jobs:
           export GOPROXY=https://proxy.golang.org,direct
           if [ -n "$WRT_PACKAGE" ]; then
             echo "=== TARGETED QUICK TEST FOR PACKAGE: $WRT_PACKAGE ==="
-            make package/feeds/packages/avahi/compile -j$(nproc) || make package/feeds/packages/avahi/compile -j1 V=s
+            for PKG in $WRT_PACKAGE; do
+              make package/feeds/packages/$PKG/compile -j$(nproc) || make package/$PKG/compile -j$(nproc) || make package/feeds/packages/$PKG/compile -j1 V=s || make package/$PKG/compile -j1 V=s
+            done
           else
             make -j$(nproc) || make -j1 V=s
           fi
