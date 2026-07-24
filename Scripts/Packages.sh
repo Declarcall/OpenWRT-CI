@@ -63,6 +63,7 @@ UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
 UPDATE_PACKAGE "helloworld" "fw876/helloworld" "master" "name"
 UPDATE_PACKAGE "adbyby" "sirpdboy/luci-app-adbyby-plus" "main"
 UPDATE_PACKAGE "dae" "sbwml/luci-app-dae" "main"
+UPDATE_PACKAGE "v2ray-geodata" "sbwml/v2ray-geodata" "master"
 
 UPDATE_PACKAGE "luci-app-tailscale" "asvow/luci-app-tailscale" "main"
 
