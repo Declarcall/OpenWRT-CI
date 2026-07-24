@@ -256,3 +256,15 @@ if [ -f "$RUST_FILE" ]; then
 		echo "rust fix failed; continuing!"
 	fi
 fi
+
+#修复avahi缺失libdaemon依赖编译失败
+AVAHI_FILE="$(find "$FEEDS_PACKAGES" -maxdepth 4 -type f -wholename '*/avahi/Makefile' -print -quit 2>/dev/null)"
+if [ -f "$AVAHI_FILE" ]; then
+	echo " "
+	if sed -i 's/+libdaemon//g' "$AVAHI_FILE"; then
+		echo "avahi Makefile has been fixed!"
+	else
+		echo "avahi Makefile fix failed; continuing!"
+	fi
+fi
+
