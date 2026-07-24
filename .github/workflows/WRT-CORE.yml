@@ -192,6 +192,9 @@ jobs:
             echo "========================================================="
             echo "=== TARGETED VERBOSE TEST FOR PACKAGES: $WRT_PACKAGE ==="
             echo "========================================================="
+            echo "--> Preparing Host Build Tools (tools/install)..."
+            make tools/install -j$(nproc)
+            echo "========================================================="
             echo "--> .config entries for avahi / daemon / dbus:"
             grep -iE "avahi|daemon|dbus" .config || true
             echo "========================================================="
