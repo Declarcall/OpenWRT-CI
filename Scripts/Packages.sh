@@ -60,7 +60,7 @@ UPDATE_PACKAGE "momo" "nikkinikki-org/OpenWrt-momo" "main"
 UPDATE_PACKAGE "nikki" "nikkinikki-org/OpenWrt-nikki" "main"
 UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev" "pkg"
 UPDATE_PACKAGE "passwall" "Openwrt-Passwall/openwrt-passwall" "main" "pkg"
-UPDATE_PACKAGE "helloworld" "fw876/helloworld" "master" "pkg"
+UPDATE_PACKAGE "helloworld" "fw876/helloworld" "master" "name"
 UPDATE_PACKAGE "adbyby" "sirpdboy/luci-app-adbyby-plus" "main"
 UPDATE_PACKAGE "dae" "sbwml/luci-app-dae" "main"
 
