@@ -92,6 +92,11 @@ jobs:
           export GOPROXY=https://proxy.golang.org,direct
           make package/luci-app-dae/dae/download V=s 2>&1 | tail -n 50
 
+      - name: Compile Host Tools
+        run: |
+          cd ./wrt/
+          make tools/compile -j$(nproc) || make tools/compile -j1 V=s
+
       - name: Compile dae (V=s Full Verbose)
         id: compile_dae
         continue-on-error: true
