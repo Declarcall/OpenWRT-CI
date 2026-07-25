@@ -2,6 +2,9 @@
 name: TEST-DAE-COMPILE
 
 on:
+  push:
+    branches:
+      - dev
   workflow_dispatch:
 
 permissions: write-all
