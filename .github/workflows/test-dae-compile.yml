@@ -92,6 +92,16 @@ jobs:
           export GOPROXY=https://proxy.golang.org,direct
           make package/luci-app-dae/dae/download V=s 2>&1 | tail -n 50
 
+      - name: Cache Toolchain & Host Tools
+        uses: actions/cache@v4
+        with:
+          key: test-dae-toolchain-${{ runner.os }}-${{ hashFiles('Config/JDC-ARTHUR.txt') }}
+          restore-keys: |
+            test-dae-toolchain-${{ runner.os }}-
+          path: |
+            ./wrt/staging_dir/host*
+            ./wrt/staging_dir/tool*
+
       - name: Compile Host Tools & Target Toolchain
         run: |
           cd ./wrt/
