@@ -234,7 +234,20 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add -f "$LOG_DIR"
-          git diff --quiet && git diff --staged --quiet || (git commit -m "ci(logs): save build failure log for ${WRT_NAME:-BUILD} [$TIMESTAMP]" && (git pull --rebase origin dev || true) && git push origin dev)
+          git diff --quiet && git diff --staged --quiet || (
+            git commit -m "ci(logs): save build failure log for ${WRT_NAME:-BUILD} [$TIMESTAMP]" && \
+            for i in 1 2 3; do
+              git pull --rebase origin dev && git push origin dev && break || sleep 2
+            done
+          )
+
+      - name: Upload Build Failure Log Artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-log-${{ env.WRT_NAME }}-${{ env.WRT_DATE }}
+          path: logs/build_failures/
+          retention-days: 7
 
       - name: Machine Information
         run: |
