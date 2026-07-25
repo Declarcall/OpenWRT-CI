@@ -18,6 +18,7 @@ on:
       - '.gitignore'
       - 'logs/**'
       - 'Logs/**'
+      - '.github/workflows/test-dae-compile.yml'
   #手动编译触发
   workflow_dispatch:
     inputs:
