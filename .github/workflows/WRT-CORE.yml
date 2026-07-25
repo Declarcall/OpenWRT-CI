@@ -185,6 +185,7 @@ jobs:
       - name: Compile Firmware
         if: env.WRT_TEST != 'true'
         run: |
+          set -o pipefail
           cd ./wrt/
           export GOPROXY=https://proxy.golang.org,direct
           make -j$(nproc) || make -j1 V=s 2>&1 | tee /tmp/build_verbose.log
