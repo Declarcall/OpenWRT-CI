@@ -257,3 +257,15 @@ if [ -f "$RUST_FILE" ]; then
 	fi
 fi
 
+#适配dae与cgroupv2补丁
+CGROUP_DIR="$FEEDS_PACKAGES/utils/cgroupfs-mount"
+if [ -d "$CGROUP_DIR" ]; then
+	echo " "
+	echo "Patching cgroupfs-mount for dae cgroupv2 support..."
+	mkdir -p "$CGROUP_DIR/patches"
+	curl -sSL "https://raw.githubusercontent.com/sbwml/luci-app-dae/main/.cgroupfs/900-add-cgroupfs2.patch" -o "$CGROUP_DIR/patches/900-add-cgroupfs2.patch" 2>/dev/null || true
+	curl -sSL "https://raw.githubusercontent.com/sbwml/luci-app-dae/main/.cgroupfs/cgroupfs-mount.init.patch" | patch -d "$CGROUP_DIR" -p1 2>/dev/null || true
+	echo "cgroupfs-mount patched successfully!"
+fi
+
+
