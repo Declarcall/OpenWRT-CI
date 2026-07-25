@@ -268,4 +268,13 @@ if [ -d "$CGROUP_DIR" ]; then
 	echo "cgroupfs-mount patched successfully!"
 fi
 
+#修复dae版本号以兼容apk打包格式(0.4.0rc1 -> 0.4.0_rc1)
+DAE_MAKEFILE="$(find "$PKG_PATH" -type f -path "*/dae/Makefile" 2>/dev/null)"
+if [ -n "$DAE_MAKEFILE" ]; then
+	echo " "
+	echo "Fixing dae PKG_VERSION for apk-tools compatibility..."
+	sed -i -E 's/PKG_VERSION:=([0-9\.]+)rc([0-9]+)/PKG_VERSION:=\1_rc\2/g' "$DAE_MAKEFILE"
+	echo "dae Makefile patched!"
+fi
+
 
