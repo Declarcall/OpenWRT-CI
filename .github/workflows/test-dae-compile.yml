@@ -102,11 +102,12 @@ jobs:
             ./wrt/staging_dir/host*
             ./wrt/staging_dir/tool*
 
-      - name: Compile Host Tools & Target Toolchain
+      - name: Compile Host Tools, Target Toolchain & Kernel Headers
         run: |
           cd ./wrt/
           make tools/compile -j$(nproc) || make tools/compile -j1 V=s
           make toolchain/compile -j$(nproc) || make toolchain/compile -j1 V=s
+          make target/compile -j$(nproc) || make target/compile -j1 V=s
 
       - name: Compile dae (V=s Full Verbose)
         id: compile_dae
