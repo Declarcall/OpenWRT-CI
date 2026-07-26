@@ -282,4 +282,13 @@ if [ -n "$DAE_MAKEFILE" ]; then
 	echo "dae Makefile patched!"
 fi
 
+# 修复 qca-nss-ecm: 动态匹配 kmod-qca-nss-drv-rmnet 驱动的存在性，防止硬件加速配置与未安装驱动产生 modpost 符号未定义冲突
+ECM_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/qca-nss-ecm/Makefile" 2>/dev/null)"
+if [ -n "$ECM_MAKEFILE" ]; then
+	echo " "
+	echo "Patching qca-nss-ecm RMNET conditional support..."
+	sed -i '/ECM_INTERFACE_RMNET_ENABLE/s/=.*/=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet),y,n)/g' "$ECM_MAKEFILE"
+	echo "qca-nss-ecm Makefile patched!"
+fi
+
 
