@@ -282,11 +282,4 @@ if [ -n "$DAE_MAKEFILE" ]; then
 	echo "dae Makefile patched!"
 fi
 
-#启用蜂窝 4G/5G Modem (RmNet) NSS 硬件加速驱动组件，提供 nss_rmnet_rx_get_ifnum 符号支持并保持加速开启
-echo " "
-echo "Enabling RmNet NSS HW acceleration drivers..."
-echo "CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet=y" >> .config
-echo "CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet=y" >> .config
-echo "RmNet NSS HW acceleration drivers enabled!"
-
 
