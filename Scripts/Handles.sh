@@ -282,13 +282,10 @@ if [ -n "$DAE_MAKEFILE" ]; then
 	echo "dae Makefile patched!"
 fi
 
-#修复 qca-nss-ecm 缺少 rmnet 支持时的 nss_rmnet_rx_get_ifnum modpost 未定义错误
-ECM_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/qca-nss-ecm/Makefile" 2>/dev/null)"
-if [ -n "$ECM_MAKEFILE" ]; then
-	echo " "
-	echo "Fixing qca-nss-ecm rmnet undefined symbol..."
-	sed -i 's/ECM_INTERFACE_RMNET_ENABLE=y/ECM_INTERFACE_RMNET_ENABLE=n/g; s/ECM_INTERFACE_RMNET_ENABLE:=y/ECM_INTERFACE_RMNET_ENABLE:=n/g' "$ECM_MAKEFILE"
-	echo "qca-nss-ecm Makefile patched!"
-fi
+#启用蜂窝 4G/5G Modem (RmNet) NSS 硬件加速驱动，提供 nss_rmnet_rx_get_ifnum 符号支持并保持加速开启
+echo " "
+echo "Enabling kmod-qca-nss-drv-rmnet for full cellular modem HW acceleration..."
+echo "CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet=y" >> .config
+echo "kmod-qca-nss-drv-rmnet enabled!"
 
 
