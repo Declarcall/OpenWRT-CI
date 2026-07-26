@@ -1,5 +1,6 @@
 # OpenWRT-CI Build & Dependency Rules
 
+> **核心铁律**：**严禁图省事阉割功能、删除依赖或绕过报错**！遇到编译中断或符号缺失，必须追根溯源补齐缺失的源码包与驱动组件，确保固件功能与硬件加速 100% 完整。
 > **强制前置规则**：在执行任何 CI 编译任务、修改配置文件、编写 Shell 脚本或调试报错前，必须先复核并严苛遵循项目标准构建链路文档 [openwrt_standard_build_flow.md](file:///.docs/openwrt_standard_build_flow.md)。
 
 ## 1. 编译期磁盘防爆原则 (Build-Time Disk Space Guard)
