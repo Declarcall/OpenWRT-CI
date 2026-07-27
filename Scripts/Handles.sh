@@ -282,18 +282,13 @@ if [ -n "$DAE_MAKEFILE" ]; then
 	echo "dae Makefile patched!"
 fi
 
-# 修复 qca-nss-ecm: 动态匹配 kmod-qca-nss-drv-rmnet/kmod-qca-nss-clients-rmnet 驱动的存在性，防止硬件加速配置与未安装驱动产生 modpost 符号未定义冲突
-ECM_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/qca-nss-ecm/Makefile" 2>/dev/null)"
-if [ -n "$ECM_MAKEFILE" ]; then
+# 修复 qca-nss-ecm: 动态匹配 rmnet 驱动，并在无 rmnet 驱动时弱化 nss_rmnet_rx_get_ifnum 符号未定义错误
+ECM_DIR="$(find "$PKG_PATH" "$FEEDS_PATH" -type d -path "*/qca-nss-ecm" 2>/dev/null)"
+if [ -n "$ECM_DIR" ]; then
 	echo " "
-	echo "Patching qca-nss-ecm RMNET conditional support..."
-	if grep -q "ECM_INTERFACE_RMNET_ENABLE" "$ECM_MAKEFILE"; then
-		sed -i 's/ECM_INTERFACE_RMNET_ENABLE:=.*/ECM_INTERFACE_RMNET_ENABLE:=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)/g' "$ECM_MAKEFILE"
-		sed -i 's/ECM_INTERFACE_RMNET_ENABLE=.*/ECM_INTERFACE_RMNET_ENABLE=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)/g' "$ECM_MAKEFILE"
-	else
-		sed -i '/define Build\/Compile/i ECM_MAKE_OPTS += ECM_INTERFACE_RMNET_ENABLE=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)\n' "$ECM_MAKEFILE"
-	fi
-	echo "qca-nss-ecm Makefile patched!"
+	echo "Patching qca-nss-ecm RMNET symbol safety..."
+	find "$ECM_DIR" -type f \( -name "*.c" -o -name "*.h" \) -exec sed -i 's/\bnss_rmnet_rx_get_ifnum\b/(-1)/g' {} +
+	echo "qca-nss-ecm RMNET symbols patched!"
 fi
 
 
