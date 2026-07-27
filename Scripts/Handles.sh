@@ -287,10 +287,11 @@ ECM_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/qca-nss-ecm/Make
 if [ -n "$ECM_MAKEFILE" ]; then
 	echo " "
 	echo "Patching qca-nss-ecm RMNET conditional support..."
-	sed -i 's/ECM_INTERFACE_RMNET_ENABLE:=y/ECM_INTERFACE_RMNET_ENABLE:=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)/g' "$ECM_MAKEFILE"
-	sed -i 's/ECM_INTERFACE_RMNET_ENABLE=y/ECM_INTERFACE_RMNET_ENABLE=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)/g' "$ECM_MAKEFILE"
-	if ! grep -q "ECM_INTERFACE_RMNET_ENABLE" "$ECM_MAKEFILE"; then
-		sed -i '/ECM_MAKE_OPTS/a ECM_MAKE_OPTS += ECM_INTERFACE_RMNET_ENABLE=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)' "$ECM_MAKEFILE"
+	if grep -q "ECM_INTERFACE_RMNET_ENABLE" "$ECM_MAKEFILE"; then
+		sed -i 's/ECM_INTERFACE_RMNET_ENABLE:=.*/ECM_INTERFACE_RMNET_ENABLE:=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)/g' "$ECM_MAKEFILE"
+		sed -i 's/ECM_INTERFACE_RMNET_ENABLE=.*/ECM_INTERFACE_RMNET_ENABLE=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)/g' "$ECM_MAKEFILE"
+	else
+		sed -i '/define Build\/Compile/i ECM_MAKE_OPTS += ECM_INTERFACE_RMNET_ENABLE=$(if $(CONFIG_PACKAGE_kmod-qca-nss-drv-rmnet)$(CONFIG_PACKAGE_kmod-qca-nss-clients-rmnet),y,n)\n' "$ECM_MAKEFILE"
 	fi
 	echo "qca-nss-ecm Makefile patched!"
 fi
