@@ -282,13 +282,25 @@ if [ -n "$DAE_MAKEFILE" ]; then
 	echo "dae Makefile patched!"
 fi
 
-# 修复 qca-nss-ecm: 将 RAWIP 5G/4G 模组中的 nss_rmnet_rx_get_ifnum 映射至通用 nss_cmn_get_interface_number_by_dev，实现 100% 旁路加速与干净编译
-ECM_DIR="$(find "$PKG_PATH" "$FEEDS_PATH" -type d -path "*/qca-nss-ecm" 2>/dev/null)"
-if [ -n "$ECM_DIR" ]; then
+# 修复 qca-nss-ecm: 在 patches 目录下生成 016-fix-rawip-rmnet-symbol.patch 补丁，确保解压后自动解耦缺失符号，实现 100% 旁路加速与干净编译
+ECM_PATCH_DIR="$(find "$PKG_PATH" "$FEEDS_PATH" -type d -path "*/qca-nss-ecm/patches" 2>/dev/null)"
+if [ -n "$ECM_PATCH_DIR" ]; then
 	echo " "
-	echo "Patching qca-nss-ecm RAWIP 5G/4G HW acceleration symbol in ecm_nss_common.h..."
-	find "$ECM_DIR" -type f -name "ecm_nss_common.h" -exec sed -i 's/nss_rmnet_rx_get_ifnum(dev)/nss_cmn_get_interface_number_by_dev(dev)/g' {} +
-	echo "qca-nss-ecm RAWIP symbol patched!"
+	echo "Generating 016-fix-rawip-rmnet-symbol.patch for qca-nss-ecm..."
+	cat << 'EOF' > "$ECM_PATCH_DIR/016-fix-rawip-rmnet-symbol.patch"
+--- a/frontends/nss/ecm_nss_common.h
++++ b/frontends/nss/ecm_nss_common.h
+@@ -73,7 +73,7 @@ static inline int32_t ecm_nss_co
+ 
+ #ifdef ECM_INTERFACE_RAWIP_ENABLE
+ 	if (dev->type == ARPHRD_RAWIP) {
+-		return nss_rmnet_rx_get_ifnum(dev);
++		return nss_cmn_get_interface_number_by_dev(dev);
+ 	}
+ #endif
+ 
+EOF
+	echo "qca-nss-ecm patch 016 generated successfully!"
 fi
 
 
