@@ -4,6 +4,7 @@
 .docs/
 .secrets/
 .env
+.temp_build_source/
 
 # Logs and temporary execution files
 logs/
