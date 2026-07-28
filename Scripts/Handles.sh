@@ -10,6 +10,9 @@ else
 	FEEDS_PATH="$(dirname "$(pwd)")/feeds"
 fi
 
+export GOFLAGS="-buildvcs=false"
+export GOPROXY="https://proxy.golang.org,direct"
+
 #预置HomeProxy数据
 HP_DIR="$(find "$PKG_PATH" -maxdepth 1 -type d -name '*homeproxy*' -print -quit)"
 if [ -n "$HP_DIR" ]; then
