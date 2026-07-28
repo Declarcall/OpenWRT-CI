@@ -303,4 +303,15 @@ EOF
 	echo "qca-nss-ecm patch 016 generated successfully!"
 fi
 
+# 彻底裁切禁用 avahi dbus 变体，防止 apk rootfs 打包阶段发生 avahi-dbus 与 avahi-nodbus 包安装冲突
+AVAHI_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/avahi/Makefile" 2>/dev/null)"
+if [ -n "$AVAHI_MAKEFILE" ]; then
+	echo " "
+	echo "Disabling avahi dbus variant in avahi/Makefile..."
+	sed -i 's/DEFAULT_VARIANT:=dbus/DEFAULT_VARIANT:=nodbus/g' "$AVAHI_MAKEFILE"
+	sed -i '/define Package\/avahi-dbus-daemon/,/endef/d' "$AVAHI_MAKEFILE"
+	sed -i '/define Package\/libavahi-dbus-support/,/endef/d' "$AVAHI_MAKEFILE"
+	echo "avahi dbus variant disabled!"
+fi
+
 
