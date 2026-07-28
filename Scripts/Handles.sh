@@ -314,4 +314,14 @@ if [ -n "$AVAHI_MAKEFILE" ]; then
 	echo "avahi DEFAULT_VARIANT switched to nodbus cleanly!"
 fi
 
+# 修复 athena-led: 上游 2.5.0 标签不存在导致 404，回退为已发布的 2.4.0 稳定版
+ATHENA_LED_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/athena-led/Makefile" 2>/dev/null)"
+if [ -n "$ATHENA_LED_MAKEFILE" ]; then
+	echo " "
+	echo "Fixing athena-led PKG_VERSION to 2.4.0..."
+	sed -i 's/PKG_VERSION:=2.5.0/PKG_VERSION:=2.4.0/g' "$ATHENA_LED_MAKEFILE"
+	sed -i 's/PKG_HASH:=.*/PKG_HASH:=243560a5e6bb52e5a493f7efa528771a6ab26e325a69b6e1d9d89647eaac5f3f/g' "$ATHENA_LED_MAKEFILE"
+	echo "athena-led PKG_VERSION fixed to 2.4.0!"
+fi
+
 
