@@ -30,7 +30,12 @@ UPDATE_PACKAGE() {
 		fi
 	done
 
-	# 克隆 GitHub 仓库
+	# 若本地已存在该插件源码包，则无需重复拉取
+	if [ -d "./$PKG_NAME" ] || [ -d "./$REPO_NAME" ]; then
+		echo "Package $PKG_NAME already present in package directory, skipping git clone."
+		return 0
+	fi
+
 	git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
 
 	# 处理克隆的仓库
@@ -38,7 +43,9 @@ UPDATE_PACKAGE() {
 		find ./$REPO_NAME/*/ -maxdepth 3 -type d -iname "*$PKG_NAME*" -prune -exec cp -rf {} ./ \;
 		rm -rf ./$REPO_NAME/
 	elif [[ "$PKG_SPECIAL" == "name" ]]; then
-		mv -f $REPO_NAME $PKG_NAME
+		if [ "$REPO_NAME" != "$PKG_NAME" ]; then
+			mv -f $REPO_NAME $PKG_NAME
+		fi
 	fi
 }
 
