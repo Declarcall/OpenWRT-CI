@@ -4,8 +4,10 @@
 
 if [ -n "${GITHUB_WORKSPACE:-}" ] && [ -d "$GITHUB_WORKSPACE/wrt/package" ]; then
 	PKG_PATH="$GITHUB_WORKSPACE/wrt/package"
+	FEEDS_PATH="$GITHUB_WORKSPACE/wrt/feeds"
 else
 	PKG_PATH="$(pwd)"
+	FEEDS_PATH="$(dirname "$(pwd)")/feeds"
 fi
 
 #预置HomeProxy数据
