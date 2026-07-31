@@ -23,6 +23,13 @@ echo "=========================================================="
 BUILD_WORK_DIR="$PROJ_ROOT/.temp_build_source/local_docker_wrt"
 mkdir -p "$BUILD_WORK_DIR"
 
+# Use pre-built image if available, otherwise fall back to ubuntu:22.04
+BUILDER_IMAGE="openwrt-builder:local"
+if ! docker image inspect "$BUILDER_IMAGE" &>/dev/null; then
+    echo "Pre-built image not found, using ubuntu:22.04 (slower first run)..."
+    BUILDER_IMAGE="ubuntu:22.04"
+fi
+
 # Step 1: Run build inside Docker container with --cpus=8 (50% CPU limit & low priority)
 docker rm -f openwrt_local_builder 2>/dev/null || true
 nice -n 19 ionice -c 3 docker run --rm \
@@ -31,19 +38,27 @@ nice -n 19 ionice -c 3 docker run --rm \
     -v "$PROJ_ROOT:/project" \
     -v "$BUILD_WORK_DIR:/build" \
     -w /build \
-    ubuntu:22.04 bash -c '
+    $BUILDER_IMAGE bash -c '
         set -e
         export DEBIAN_FRONTEND=noninteractive
         export FORCE_UNSAFE_CONFIGURE=1
         export GOFLAGS="-buildvcs=false"
-        export GOPROXY="https://proxy.golang.org,direct"
-        echo "=== Installing OpenWRT Build Dependencies in Container ==="
-        apt-get update -qq
-        apt-get install -y -qq \
-            build-essential clang llvm lld flex bison gawk gettext git libncurses-dev \
-            libssl-dev python3 python3-setuptools python3-dev python3-pip python3-distutils \
-            rsync unzip zlib1g-dev file wget subversion swig time \
-            curl ccache sudo patch cmake libgmp-dev libmpfr-dev libmpc-dev
+        export GOPROXY="https://goproxy.cn,https://goproxy.io,direct"
+        export GONOSUMCHECK="*"
+        git config --global --add safe.directory "*"
+
+        # Check if pre-built image (skip apt) or base ubuntu (need apt)
+        if ! command -v ccache &>/dev/null; then
+            echo "=== Installing OpenWRT Build Dependencies in Container ==="
+            apt-get update -qq
+            apt-get install -y -qq \
+                build-essential clang llvm lld flex bison gawk gettext git libncurses-dev \
+                libssl-dev python3 python3-setuptools python3-dev python3-pip python3-distutils \
+                rsync unzip zlib1g-dev file wget subversion swig time \
+                curl ccache sudo patch cmake libgmp-dev libmpfr-dev libmpc-dev
+        else
+            echo "=== Build dependencies already installed (pre-built image) ==="
+        fi
 
         echo "=== Preparing OpenWRT Source Code ==="
         if [ ! -d "/build/.git" ]; then
