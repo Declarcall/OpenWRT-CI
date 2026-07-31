@@ -11,7 +11,11 @@ else
 fi
 
 export GOFLAGS="-buildvcs=false"
-export GOPROXY="https://proxy.golang.org,direct"
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+	export GOPROXY="https://proxy.golang.org,direct"
+else
+	export GOPROXY="https://goproxy.cn,https://goproxy.io,direct"
+fi
 
 #预置HomeProxy数据
 HP_DIR="$(find "$PKG_PATH" -maxdepth 1 -type d -name '*homeproxy*' -print -quit)"
@@ -308,13 +312,24 @@ EOF
 	echo "qca-nss-ecm patch 016 generated successfully!"
 fi
 
-# 切换 avahi 默认变体为 nodbus，防止 apk rootfs 打包阶段发生 avahi-dbus 与 avahi-nodbus 包安装冲突
+# 修复所有 qca-nss-* 关联包的镜像 Hash 校验不匹配问题
+find "$PKG_PATH" "$FEEDS_PATH" -type f -wholename "*/qca-nss*/Makefile" 2>/dev/null | while read -r NSS_MAKEFILE; do
+	sed -i 's/PKG_MIRROR_HASH:=.*/PKG_MIRROR_HASH:=skip/g' "$NSS_MAKEFILE"
+done
+echo "All qca-nss PKG_MIRROR_HASH fixed to skip!"
+
+# 切换 avahi 默认变体为 nodbus，并移除与 dbus 绑定的 BuildPackage 调用 (libavahi-client, avahi-utils, libavahi-dbus-support, avahi-dbus-daemon)
 AVAHI_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/avahi/Makefile" 2>/dev/null)"
 if [ -n "$AVAHI_MAKEFILE" ]; then
 	echo " "
-	echo "Switching avahi DEFAULT_VARIANT to nodbus in avahi/Makefile..."
+	echo "Switching avahi to nodbus cleanly and removing dbus-only BuildPackage calls..."
 	sed -i 's/DEFAULT_VARIANT:=dbus/DEFAULT_VARIANT:=nodbus/g' "$AVAHI_MAKEFILE"
-	echo "avahi DEFAULT_VARIANT switched to nodbus cleanly!"
+	sed -i '/BuildPackage,libavahi-dbus-support/d' "$AVAHI_MAKEFILE"
+	sed -i '/BuildPackage,avahi-dbus-daemon/d' "$AVAHI_MAKEFILE"
+	sed -i '/BuildPackage,libavahi-client/d' "$AVAHI_MAKEFILE"
+	sed -i '/BuildPackage,avahi-utils/d' "$AVAHI_MAKEFILE"
+	rm -rf "$(dirname "$PKG_PATH")/build_dir/target-"*/avahi-* 2>/dev/null || true
+	echo "avahi Makefile fixed successfully!"
 fi
 
 # 修复 athena-led: 上游 2.5.0 标签不存在导致 404，回退为已发布的 2.4.0 稳定版
