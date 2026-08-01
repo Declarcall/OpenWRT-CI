@@ -27,5 +27,6 @@
 ## 6. CI 诊断日志推送无损防卡原则 (CI Failure Log Push Reliability)
 - **推送前工作区未暂存文件 Stash 隔离**：GitHub Actions 在编译失败推送日志前，必须先执行 `git stash -u 2>/dev/null || true`，清空 OpenWRT 编译过程产生的未暂存修改，确保 `git pull --rebase` 和 `git push origin dev` 100% 成功推送，绝不丢失日志。
 
-## 7. 本地与线上 CI 编译链路绝对一致性原则 (Local & CI Pipeline Parity)
-- **拒绝本地手动旁路修改**：任何对 Makefile、配置文件、源码的修复与调整，必须 100% 写入 `Scripts/Packages.sh`、`Scripts/Handles.sh` 或 `Scripts/Settings.sh` 中，严禁在本地容器或编译目录中进行手动 `sed` 或人工介入旁路修改，确保本地独立容器编译与 GitHub Actions 云端构建链路 100% 同构一致。
+## 7. 本地预检验证与线上 CI 加速原则 (Local Validation & CI Acceleration)
+- **本地编译定位（快速预检）**：跑本地 Docker 编译的核心目的是**作为前置验证工具（Pre-flight Check）**。通过本地隔离环境预先跑通自动化脚本，提前拦截所有的依赖冲突、Makefile 语法错误及镜像体积超限，为线上编译避坑扫清障碍。
+- **线上编译定位（高效产出）**：通过本地脚本 100% 验证无误后再推送，确保 GitHub Actions 线上 CI 能够一次性通关成功，避免在云端盲目试错等待，从而实现**极速、高效的线上云端固件构建与发布**！
