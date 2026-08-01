@@ -6,6 +6,10 @@ name: JDC-ARTHUR
 
 #CI计划
 on:
+  #推送 dev 分支时自动触发编译
+  push:
+    branches:
+      - dev
   #手动编译触发
   workflow_dispatch:
     inputs:

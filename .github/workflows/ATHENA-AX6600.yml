@@ -6,18 +6,6 @@ name: ATHENA-AX6600
 
 #CI计划
 on:
-  #自动编译：当推送 dev 分支时触发
-  push:
-    branches:
-      - dev
-    paths-ignore:
-      - '**.md'
-      - '.agents/**'
-      - '.docs/**'
-      - '.scripts/**'
-      - '.gitignore'
-      - 'logs/**'
-      - 'Logs/**'
   #手动编译
   workflow_dispatch:
     inputs:
