@@ -347,13 +347,13 @@ if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 	echo "athena-led Makefile updated successfully!"
 fi
 
-# 修复 JDC-ATHENA (jdcloud_re-cs-02) 内核 FIT 镜像体积溢出报错 (6369500 > 6291456)
+# 修复 JDCloud 高通设备 (jdcloud_re-cs-02 雅典娜 / jdcloud_re-ss-01 亚瑟 / jdcloud_re-cs-07 百里) 内核 FIT 镜像体积溢出报错 (6369500 > 6291456)
 IPQ60XX_MK="$(find "$(dirname "$PKG_PATH")" -type f -path "*/target/linux/qualcommax/image/ipq60xx.mk" 2>/dev/null)"
 if [ -n "$IPQ60XX_MK" ]; then
 	echo " "
-	echo "Switching jdcloud_re-cs-02 kernel compression to LZMA (FitImageLzma)..."
-	sed -i '/define Device\/jdcloud_re-cs-02/,/endef/s/\$(call Device\/FitImage)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
-	echo "ipq60xx.mk jdcloud_re-cs-02 LZMA kernel compression applied successfully!"
+	echo "Switching all jdcloud devices kernel compression to LZMA (FitImageLzma)..."
+	sed -i '/define Device\/jdcloud/,/endef/s/\$(call Device\/FitImage)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
+	echo "ipq60xx.mk jdcloud devices LZMA kernel compression applied successfully!"
 fi
 
 
