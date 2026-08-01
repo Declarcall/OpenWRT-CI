@@ -348,7 +348,7 @@ if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 fi
 
 # 修复 JDC-ATHENA (jdcloud_re-cs-02) 内核 FIT 镜像体积溢出报错 (6369500 > 6291456)
-IPQ60XX_MK="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/target/linux/qualcommax/image/ipq60xx.mk" 2>/dev/null)"
+IPQ60XX_MK="$(find "$(dirname "$PKG_PATH")" -type f -path "*/target/linux/qualcommax/image/ipq60xx.mk" 2>/dev/null)"
 if [ -n "$IPQ60XX_MK" ]; then
 	echo " "
 	echo "Switching jdcloud_re-cs-02 kernel compression to LZMA (FitImageLzma)..."
