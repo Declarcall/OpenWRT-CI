@@ -318,12 +318,14 @@ find "$PKG_PATH" "$FEEDS_PATH" -type f -wholename "*/qca-nss*/Makefile" 2>/dev/n
 done
 echo "All qca-nss PKG_MIRROR_HASH fixed to skip!"
 
-# 切换 avahi 默认变体为 nodbus，并移除与 dbus 绑定的 BuildPackage 调用 (libavahi-client, avahi-utils, libavahi-dbus-support, avahi-dbus-daemon)
+# 切换 avahi 默认变体为 nodbus，并将 nodbus 子包的 VARIANT 正确修正为 nodbus
 AVAHI_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/avahi/Makefile" 2>/dev/null)"
 if [ -n "$AVAHI_MAKEFILE" ]; then
 	echo " "
-	echo "Switching avahi to nodbus cleanly and removing dbus-only BuildPackage calls..."
+	echo "Switching avahi to nodbus cleanly and fixing nodbus VARIANT fields..."
 	sed -i 's/DEFAULT_VARIANT:=dbus/DEFAULT_VARIANT:=nodbus/g' "$AVAHI_MAKEFILE"
+	sed -i '/Package\/avahi-nodbus-daemon/,/endef/s/VARIANT:=dbus/VARIANT:=nodbus/' "$AVAHI_MAKEFILE"
+	sed -i '/Package\/libavahi-nodbus-support/,/endef/s/VARIANT:=dbus/VARIANT:=nodbus/' "$AVAHI_MAKEFILE"
 	sed -i '/BuildPackage,libavahi-dbus-support/d' "$AVAHI_MAKEFILE"
 	sed -i '/BuildPackage,avahi-dbus-daemon/d' "$AVAHI_MAKEFILE"
 	sed -i '/BuildPackage,libavahi-client/d' "$AVAHI_MAKEFILE"
@@ -332,14 +334,26 @@ if [ -n "$AVAHI_MAKEFILE" ]; then
 	echo "avahi Makefile fixed successfully!"
 fi
 
-# 修复 athena-led: 上游 2.5.0 标签不存在导致 404，回退为已发布的 2.4.0 稳定版
+# 修复 athena-led: 上游 2.5.0 标签不存在导致 404，回退为已发布的 2.4.0 稳定版，并添加 i18n 提供者声明
 ATHENA_LED_MAKEFILE="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/athena-led/Makefile" 2>/dev/null)"
 if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 	echo " "
-	echo "Fixing athena-led PKG_VERSION to 2.4.0..."
+	echo "Fixing athena-led PKG_VERSION and adding i18n PROVIDES..."
 	sed -i 's/PKG_VERSION:=2.5.0/PKG_VERSION:=2.4.0/g' "$ATHENA_LED_MAKEFILE"
 	sed -i 's/PKG_HASH:=.*/PKG_HASH:=243560a5e6bb52e5a493f7efa528771a6ab26e325a69b6e1d9d89647eaac5f3f/g' "$ATHENA_LED_MAKEFILE"
-	echo "athena-led PKG_VERSION fixed to 2.4.0!"
+	if ! grep -q "luci-i18n-athena-led-zh-cn" "$ATHENA_LED_MAKEFILE"; then
+		sed -i '/TITLE:=LuCI Support for Athena LED/a \        PROVIDES:=luci-i18n-athena-led-zh-cn' "$ATHENA_LED_MAKEFILE"
+	fi
+	echo "athena-led Makefile updated successfully!"
+fi
+
+# 修复 JDC-ATHENA (jdcloud_re-cs-02) 内核 FIT 镜像体积溢出报错 (6369500 > 6291456)
+IPQ60XX_MK="$(find "$PKG_PATH" "$FEEDS_PATH" -type f -path "*/target/linux/qualcommax/image/ipq60xx.mk" 2>/dev/null)"
+if [ -n "$IPQ60XX_MK" ]; then
+	echo " "
+	echo "Switching jdcloud_re-cs-02 kernel compression to LZMA (FitImageLzma)..."
+	sed -i '/define Device\/jdcloud_re-cs-02/,/endef/s/\$(call Device\/FitImage)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
+	echo "ipq60xx.mk jdcloud_re-cs-02 LZMA kernel compression applied successfully!"
 fi
 
 
