@@ -352,8 +352,8 @@ for IPQ60XX_MK in "../target/linux/qualcommax/image/ipq60xx.mk" "./target/linux/
 	if [ -f "$IPQ60XX_MK" ]; then
 		echo " "
 		echo "Expanding KERNEL_SIZE to 32MB and forcing LZMA for all jdcloud devices in $IPQ60XX_MK..."
-		sed -i 's/KERNEL_SIZE := .*/KERNEL_SIZE := 32768k/g' "$IPQ60XX_MK"
-		sed -i 's/\$(call Device\/FitImage)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
+		sed -i -E 's/([[:space:]]*KERNEL_SIZE[[:space:]]*:=).*/\1 32768k/g' "$IPQ60XX_MK"
+		sed -i -E 's/\$\(call[[:space:]]+Device\/FitImage\)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
 		echo "ipq60xx.mk 32MB KERNEL_SIZE & LZMA patch applied to $IPQ60XX_MK!"
 	fi
 done
@@ -362,8 +362,7 @@ for QCA_IMAGE_MK in "../target/linux/qualcommax/image/Makefile" "./target/linux/
 	if [ -f "$QCA_IMAGE_MK" ]; then
 		echo " "
 		echo "Patching qualcommax image Makefile ($QCA_IMAGE_MK) to force LZMA compression..."
-		sed -i 's/libdeflate-gzip | fit gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
-		sed -i 's/gzip | fit gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
+		sed -i -E 's/(libdeflate-gzip|gzip)[[:space:]]*\|[[:space:]]*fit[[:space:]]+gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
 		echo "qualcommax image Makefile LZMA patch applied to $QCA_IMAGE_MK!"
 	fi
 done
