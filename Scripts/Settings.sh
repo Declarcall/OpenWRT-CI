@@ -62,7 +62,13 @@ fi
 
 #高通平台调整
 DTS_PATH="./target/linux/qualcommax/dts/"
-if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]]; then
+if [[ "${WRT_TARGET^^}" == *"QUALCOMMAX"* ]] || [ -d "./target/linux/qualcommax" ]; then
+	#强制开启 Kernel LZMA 压缩，禁用 GZIP 压缩
+	sed -i 's/CONFIG_KERNEL_GZIP=y/# CONFIG_KERNEL_GZIP is not set/g' ./.config
+	sed -i 's/CONFIG_KERNEL_GZIP=y/# CONFIG_KERNEL_GZIP is not set/g' $(find ./target/linux/qualcommax/ -name "config-*" 2>/dev/null)
+	echo "CONFIG_KERNEL_LZMA=y" >> ./.config
+	find ./target/linux/qualcommax/ -name "config-*" -exec sed -i 's/# CONFIG_KERNEL_LZMA is not set/CONFIG_KERNEL_LZMA=y/g' {} + 2>/dev/null || true
+
 	#无WIFI配置调整Q6大小
 	if [[ "${WRT_CONFIG,,}" == *"wifi"* && "${WRT_CONFIG,,}" == *"no"* ]]; then
 		find $DTS_PATH -type f ! -iname '*nowifi*' -exec sed -i 's/ipq\(6018\|8074\).dtsi/ipq\1-nowifi.dtsi/g' {} +
