@@ -348,22 +348,24 @@ if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 fi
 
 # 修复 JDCloud 高通设备 (jdcloud_re-cs-02 雅典娜 / jdcloud_re-ss-01 亚瑟 / jdcloud_re-cs-07 百里) 内核 FIT 镜像体积限制与 LZMA 压缩
-IPQ60XX_MK="$(find "$(dirname "$PKG_PATH")" -type f -path "*/target/linux/qualcommax/image/ipq60xx.mk" 2>/dev/null)"
-if [ -n "$IPQ60XX_MK" ]; then
-	echo " "
-	echo "Expanding KERNEL_SIZE to 16MB and forcing LZMA compression for all jdcloud devices in ipq60xx.mk..."
-	sed -i 's/KERNEL_SIZE := 6144k/KERNEL_SIZE := 16384k/g' "$IPQ60XX_MK"
-	sed -i 's/\$(call Device\/FitImage)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
-	echo "ipq60xx.mk jdcloud devices 16MB KERNEL_SIZE and LZMA patch applied successfully!"
-fi
+for IPQ60XX_MK in "../target/linux/qualcommax/image/ipq60xx.mk" "./target/linux/qualcommax/image/ipq60xx.mk" $(find "$(pwd)/.." -name "ipq60xx.mk" 2>/dev/null); do
+	if [ -f "$IPQ60XX_MK" ]; then
+		echo " "
+		echo "Expanding KERNEL_SIZE to 32MB and forcing LZMA for all jdcloud devices in $IPQ60XX_MK..."
+		sed -i 's/KERNEL_SIZE := .*/KERNEL_SIZE := 32768k/g' "$IPQ60XX_MK"
+		sed -i 's/\$(call Device\/FitImage)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
+		echo "ipq60xx.mk 32MB KERNEL_SIZE & LZMA patch applied to $IPQ60XX_MK!"
+	fi
+done
 
-QCA_IMAGE_MK="$(find "$(dirname "$PKG_PATH")" -type f -path "*/target/linux/qualcommax/image/Makefile" 2>/dev/null)"
-if [ -n "$QCA_IMAGE_MK" ]; then
-	echo " "
-	echo "Patching qualcommax image Makefile to force LZMA compression for FitImage..."
-	sed -i 's/libdeflate-gzip | fit gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
-	sed -i 's/gzip | fit gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
-	echo "qualcommax image Makefile FitImage LZMA patch applied successfully!"
-fi
+for QCA_IMAGE_MK in "../target/linux/qualcommax/image/Makefile" "./target/linux/qualcommax/image/Makefile" $(find "$(pwd)/.." -name "Makefile" 2>/dev/null | grep "qualcommax/image"); do
+	if [ -f "$QCA_IMAGE_MK" ]; then
+		echo " "
+		echo "Patching qualcommax image Makefile ($QCA_IMAGE_MK) to force LZMA compression..."
+		sed -i 's/libdeflate-gzip | fit gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
+		sed -i 's/gzip | fit gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
+		echo "qualcommax image Makefile LZMA patch applied to $QCA_IMAGE_MK!"
+	fi
+done
 
 
