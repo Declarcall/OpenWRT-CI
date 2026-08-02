@@ -26,10 +26,10 @@ on:
 #CI权限
 permissions: write-all
 
-#自动取消正在运行的旧编译任务
+#允许多任务并行/防止强行中途取消正在编译的任务
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 #CI任务
 jobs:
