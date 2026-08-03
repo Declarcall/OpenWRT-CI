@@ -347,6 +347,16 @@ if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 	echo "athena-led Makefile updated successfully!"
 fi
 
+# 强制还原原厂 U-Boot 唯一支持的 FitImage (GZIP) 解压，替换上游源码默认的 FitImageLzma
+for IPQ60XX_MK in "../target/linux/qualcommax/image/ipq60xx.mk" "./target/linux/qualcommax/image/ipq60xx.mk" $(find "$(pwd)/.." -name "ipq60xx.mk" 2>/dev/null); do
+	if [ -f "$IPQ60XX_MK" ]; then
+		echo " "
+		echo "Restoring stock U-Boot FitImage (GZIP) for all jdcloud devices in $IPQ60XX_MK..."
+		sed -i -E 's/Device\/FitImageLzma/Device\/FitImage/g' "$IPQ60XX_MK"
+		echo "ipq60xx.mk FitImage (GZIP) patch applied to $IPQ60XX_MK!"
+	fi
+done
+
 
 
 
