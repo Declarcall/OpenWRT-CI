@@ -35,3 +35,10 @@
 - **脚本监听核心目的**：使用后台脚本监听任务的核心且唯一目的是**大幅节省 Token 消耗**。
 - **严禁重复轮询唤醒**：在使用 Python 等后台脚本监听任务时，**严禁设置任何形式的周期性定时器（如 schedule）重复唤醒 Agent**。
 - **OS 级完全静默**：后台脚本必须在操作系统底层完全静默运行（0 Token 消耗），只有当任务彻底完成或产生最终结果时，方可触发唯一一次通知，绝不产生无意义的上下文重送。
+
+## 9. 硬件物理分区表对齐铁律 (Hardware Flash Partition Alignment Rule)
+- **严禁篡改 `KERNEL_SIZE` 分区偏移**：`KERNEL_SIZE`（如 `6144k`）在 OpenWrt 的 `IMAGE/factory.bin := append-kernel | pad-to $(KERNEL_SIZE) | append-rootfs` 中，**决定了根文件系统 `rootfs` 的物理解包偏移地址**。改动 `KERNEL_SIZE` 会破坏路由器（如雅典娜/亚瑟等 eMMC 闪存设备）GPT 物理分区表对齐，导致 U-Boot 寻址 `rootfs` 失败而 Kernel Panic / 无 Wi-Fi / 无法开机。
+- **依靠内核高压缩算法（LZMA）瘦身**：遇到 `Build/check-size` 提示内核超限时，**必须且仅能通过 `FitImageLzma` 与 `CONFIG_KERNEL_LZMA=y` 压缩内核体积**（将 GZIP ~6.3MB 压降至 ~4.1MB），严禁通过改大 `KERNEL_SIZE` 假通关。
+
+## 10. Makefile 制表符与正则匹配安全原则 (Makefile Tab & Regex Safety Rule)
+- **Makefile 必须兼容 TAB 缩进**：OpenWrt Makefile 语法规定 `define` 内部变量前使用 TAB 制表符 (`\t`) 缩进。在 Shell 脚本中使用 `sed` 修改 Makefile 时，**必须使用兼容 TAB 和空格的扩展正则表达式 (`sed -i -E 's/([[:space:]]*VAR[[:space:]]*:=).*/.../g')`**，严禁使用硬编码普通空格的 `sed` 导致匹配静默失效。
