@@ -347,23 +347,6 @@ if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 	echo "athena-led Makefile updated successfully!"
 fi
 
-# 修复 JDCloud 高通设备 (jdcloud_re-cs-02 雅典娜 / jdcloud_re-ss-01 亚瑟 / jdcloud_re-cs-07 百里) 内核 FIT 镜像 LZMA 压缩 (保持 6144k 分区对齐，仅将内核压至 ~4.1MB)
-for IPQ60XX_MK in "../target/linux/qualcommax/image/ipq60xx.mk" "./target/linux/qualcommax/image/ipq60xx.mk" $(find "$(pwd)/.." -name "ipq60xx.mk" 2>/dev/null); do
-	if [ -f "$IPQ60XX_MK" ]; then
-		echo " "
-		echo "Forcing FitImageLzma for all jdcloud devices in $IPQ60XX_MK..."
-		sed -i -E 's/\$\(call[[:space:]]+Device\/FitImage\)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
-		echo "ipq60xx.mk FitImageLzma patch applied to $IPQ60XX_MK!"
-	fi
-done
 
-for QCA_IMAGE_MK in "../target/linux/qualcommax/image/Makefile" "./target/linux/qualcommax/image/Makefile" $(find "$(pwd)/.." -name "Makefile" 2>/dev/null | grep "qualcommax/image"); do
-	if [ -f "$QCA_IMAGE_MK" ]; then
-		echo " "
-		echo "Patching qualcommax image Makefile ($QCA_IMAGE_MK) to force LZMA compression..."
-		sed -i -E 's/(libdeflate-gzip|gzip)[[:space:]]*\|[[:space:]]*fit[[:space:]]+gzip/lzma | fit lzma/g' "$QCA_IMAGE_MK"
-		echo "qualcommax image Makefile LZMA patch applied to $QCA_IMAGE_MK!"
-	fi
-done
 
 
