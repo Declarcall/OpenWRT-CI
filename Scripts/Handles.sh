@@ -357,6 +357,15 @@ for IPQ60XX_MK in "../target/linux/qualcommax/image/ipq60xx.mk" "./target/linux/
 	fi
 done
 
+for QCA_IMAGE_MK in "../target/linux/qualcommax/image/Makefile" "./target/linux/qualcommax/image/Makefile" $(find "$(pwd)/.." -name "Makefile" 2>/dev/null | grep "qualcommax/image"); do
+	if [ -f "$QCA_IMAGE_MK" ]; then
+		echo " "
+		echo "Restoring stock U-Boot GZIP compression in $QCA_IMAGE_MK..."
+		sed -i -E 's/lzma[[:space:]]*\|[[:space:]]*fit[[:space:]]+lzma/libdeflate-gzip | fit gzip/g' "$QCA_IMAGE_MK"
+		echo "qualcommax image Makefile GZIP patch applied to $QCA_IMAGE_MK!"
+	fi
+done
+
 
 
 
