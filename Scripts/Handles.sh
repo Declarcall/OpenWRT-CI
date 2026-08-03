@@ -347,14 +347,13 @@ if [ -n "$ATHENA_LED_MAKEFILE" ]; then
 	echo "athena-led Makefile updated successfully!"
 fi
 
-# 修复 JDCloud 高通设备 (jdcloud_re-cs-02 雅典娜 / jdcloud_re-ss-01 亚瑟 / jdcloud_re-cs-07 百里) 内核 FIT 镜像体积限制与 LZMA 压缩
+# 修复 JDCloud 高通设备 (jdcloud_re-cs-02 雅典娜 / jdcloud_re-ss-01 亚瑟 / jdcloud_re-cs-07 百里) 内核 FIT 镜像 LZMA 压缩 (保持 6144k 分区对齐，仅将内核压至 ~4.1MB)
 for IPQ60XX_MK in "../target/linux/qualcommax/image/ipq60xx.mk" "./target/linux/qualcommax/image/ipq60xx.mk" $(find "$(pwd)/.." -name "ipq60xx.mk" 2>/dev/null); do
 	if [ -f "$IPQ60XX_MK" ]; then
 		echo " "
-		echo "Expanding KERNEL_SIZE to 32MB and forcing LZMA for all jdcloud devices in $IPQ60XX_MK..."
-		sed -i -E 's/([[:space:]]*KERNEL_SIZE[[:space:]]*:=).*/\1 32768k/g' "$IPQ60XX_MK"
+		echo "Forcing FitImageLzma for all jdcloud devices in $IPQ60XX_MK..."
 		sed -i -E 's/\$\(call[[:space:]]+Device\/FitImage\)/\$(call Device\/FitImageLzma)/g' "$IPQ60XX_MK"
-		echo "ipq60xx.mk 32MB KERNEL_SIZE & LZMA patch applied to $IPQ60XX_MK!"
+		echo "ipq60xx.mk FitImageLzma patch applied to $IPQ60XX_MK!"
 	fi
 done
 
