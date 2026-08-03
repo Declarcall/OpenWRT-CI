@@ -42,3 +42,9 @@
 
 ## 10. Makefile 制表符与正则匹配安全原则 (Makefile Tab & Regex Safety Rule)
 - **Makefile 必须兼容 TAB 缩进**：OpenWrt Makefile 语法规定 `define` 内部变量前使用 TAB 制表符 (`\t`) 缩进。在 Shell 脚本中使用 `sed` 修改 Makefile 时，**必须使用兼容 TAB 和空格的扩展正则表达式 (`sed -i -E 's/([[:space:]]*VAR[[:space:]]*:=).*/.../g')`**，严禁使用硬编码普通空格的 `sed` 导致匹配静默失效。
+
+## 11. 高通 NSS / QCA-NSS-ECM 驱动完整性与 Safe Stub 补丁原则 (QCA NSS Acceleration & C Safe Stub Rule)
+- **绝对保持 RAWIP 旁路加速全开**：遇到 `qca-nss-ecm` 的 `nss_rmnet_rx_get_ifnum` 符号未定义报错时，必须通过 `Handles.sh` 动态生成 `016-fix-rawip-rmnet-symbol.patch` 注入 C 语言层 Safe Stub 存根返回 `(-1)`，严禁直接关闭 `ECM_INTERFACE_RMNET_ENABLE` 导致移动 4G/5G 旁路加速功能丧失。详见 [qca_nss_ecm_compilation_guide.md](file:///.docs/qca_nss_ecm_compilation_guide.md)。
+
+## 12. `Handles.sh` 脚本生命周期与 `.config` 修改时序原则 (Build Script Lifecycle Order Rule)
+- **严禁在 `Handles.sh` 中对未初始化的 `.config` 写入**：`Handles.sh` 在 `Custom Packages` 阶段执行，而 `.config` 文件是在其后的 `Custom Settings` 阶段才被首次创建并执行 `make defconfig` 的。所有全局 `.config` 勾选必须直接写进 `Config/GENERAL.txt` 或在 `Settings.sh` 中写入。
